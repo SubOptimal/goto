@@ -68,6 +68,7 @@ goto()
       ;;
     *)
       _goto_directory "$subcommand"
+      _goto_subdirectory $1
       ;;
   esac
   return $?
@@ -86,7 +87,9 @@ _goto_usage()
 usage: goto [<option>] <alias> [<directory>]
 
 default usage:
-  goto <alias> - changes to the directory registered for the given alias
+  goto <alias>             - changes to the directory registered for the given alias
+  goto <alias> <directory> - changes to the directory registered for the given alias
+                             and then to the sub-directory matching the glob-pattern
 
 OPTIONS:
   -r, --register: registers an alias
@@ -267,6 +270,17 @@ _goto_directory()
 
   builtin cd "$target" 2> /dev/null || \
     { _goto_error "Failed to goto '$target'" && return 1; }
+}
+
+# Changes to an unregistered sub-direcotry
+_goto_subdirectory()
+{
+  local target
+  target="$1"
+  if ! [ -z "$target" ]; then
+    builtin cd $target 2> /dev/null || \
+    { _goto_error "Failed to goto sub-directory '$target'" && return 1; }
+  fi
 }
 
 # Fetches the alias directory.
